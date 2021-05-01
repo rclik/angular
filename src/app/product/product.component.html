@@ -1,0 +1,23 @@
+<h3 *ngIf="products; else noProduct">{{title}}</h3>
+
+<div class="form-group">
+    <input class="form-control" id="productName" placeholder="Arama metni giriniz" [(ngModel)]="filterText">
+    <small *ngIf="filterText != ''" class="form-text text-muted">Su an <strong>{{filterText}}</strong> aradiniz</small>
+</div>
+
+<div class="row">
+    <ng-template #noProduct>
+        <div class="alert alert-primary" role="alert">
+            Bu kategory de urun bulunamadi.
+        </div>
+    </ng-template>
+
+    <div *ngFor="let product of products | productFilter: filterText" class="card" style="width: 18rem;">
+        <img src="{{product.imageUrl}}" class="card-img-top" alt="...">
+        <div class="card-body">
+            <h5 class="card-title">{{product.name}} - {{product.price | currency: "USD": true: "1.2-2" }}</h5>
+            <p class="card-text">{{product.description}}</p>
+            <a href="#" class="btn btn-primary">Go somewhere</a>
+        </div>
+    </div>
+</div>
