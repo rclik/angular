@@ -21,6 +21,10 @@ export class ProductComponent implements OnInit {
   ];
   filterText: string = '';
 
+  addToCart(product: Product) {
+    alert('Sepete eklemeye basildi. ' + product.name);
+  }
+
   ngOnInit(): void {
   }
 
