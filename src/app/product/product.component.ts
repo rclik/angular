@@ -1,4 +1,5 @@
 import { Component, OnInit } from '@angular/core';
+import { ActivatedRoute } from '@angular/router';
 import { AlertifyService } from 'src/services/alertify.service';
 import { ProductService } from 'src/services/product.service';
 import { Product } from './product';
@@ -11,7 +12,8 @@ import { Product } from './product';
 })
 export class ProductComponent implements OnInit {
 
-  constructor(private alertifyService: AlertifyService, private productService: ProductService) { }
+  constructor(private alertifyService: AlertifyService, private productService: ProductService,
+    private acivatedRoute: ActivatedRoute) { }
 
   title = 'Urun Listesi';
   products!: Product[];
@@ -22,7 +24,9 @@ export class ProductComponent implements OnInit {
   }
 
   ngOnInit(): void {
-    this.productService.getProducts().subscribe(data => { this.products = data });
+    this.acivatedRoute.params.subscribe(params => {
+      this.productService.getProducts(params["categoryId"]).subscribe(data => { this.products = data });
+    });
   }
 
 }
