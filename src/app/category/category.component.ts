@@ -11,8 +11,6 @@ import { Category } from './category';
 export class CategoryComponent implements OnInit {
 
   constructor(private categoryService: CategoryService) { }
-
-  title = "Kategori Listesi";
   categories: Array<Category> = [];
 
   ngOnInit(): void {
