@@ -1,1 +1,52 @@
-<p>product-add-classic-form works!</p>
+<h3>Yeni Urun Ekle - Classic Forms</h3>
+
+<!-- ilk kisim bu  form un bir angular form oldugunu soyle, ismi ise addProductForm dur. -->
+<!-- ikinci kisim ise, angular form u submit edildiginde cagirilacak component function idir. Icerisine formObject ini vererek method da islem yapicagiz. -->
+<form #addProductForm="ngForm" (ngSubmit)="addProduct(addProductForm)">
+
+    <!-- birinci input alani icin acikalma -->
+    <!-- ikinci bu angular form input unun ismidir, genel olarak cok isimize yaramaz. ama en altta, bu alanin dirty olup olmadigina, validity sine baklmak icin gereklidir. -->
+    <!-- ucuncu attribute ise cok onemli, class daki model object i ile buradaki input u birbirine  esitledik. -->
+    <!-- dorduncu attribute da onemli, ngForm object icinde, bu input icin propertyName dir -->
+    <div class="form-group">
+        <input placeholder="Urun Adi" #name="ngModel" [(ngModel)]="model.name" name="htmlName" class="form-control"
+            id="htmlName" required />
+        <div *ngIf="name.invalid&&name.dirty" class="alert alert-danger">
+            Urun ismi gereklidir.
+        </div>
+    </div>
+
+    <div class="form-group">
+        <input placeholder="Urun Aciklamasi" #description="ngModel" [(ngModel)]="model.description"
+            name="htmlDescription" class="form-control" id="htmlDescriptionId" required />
+        <div *ngIf="description.invalid && description.touched" class="alert alert-danger">
+            Urun aciklamasi gereklidir
+        </div>
+    </div>
+
+    <div class="form-group">
+        <input placeholder="Urun fotograf URL i" #imageUrl="ngModel" [(ngModel)]="model.imageUrl" name="htmlImageUrl"
+            id="htmlImageUrlId" class="form-control" required />
+        <div *ngIf="imageUrl.invalid && imageUrl.touched" class="alert alert-danger">
+            Urun fotograf URL i gereklidir.
+        </div>
+    </div>
+
+    <div class="form-group">
+        <input placeholder="Urun Fiyati" #price="ngModel" [(ngModel)]="model.price" name="htmlPrice" id="htmlPriceId"
+            class="form-control" required />
+        <div *ngIf="price.invalid && price.touched" class="alert alert-danger">Urun fiyati girilmelidir.</div>
+    </div>
+
+    <div class="form-group">
+        <select #categoryId="ngModel" [(ngModel)]="model.categoryId" name="htmlCategoryName" id="htmlCategoryIdId"
+            class="form-control" required>
+            <option *ngFor="let category of categories" [value]="category.id">{{category.name}}</option>
+        </select>
+        <div *ngIf="categoryId.invalid && categoryId.touched" class="alert alert-danger">
+            Urun kategorisi girilmelidir
+        </div>
+    </div>
+
+    <button type="submit" class="btn btn-primary" [disabled]="addProductForm.invalid">Urun Ekle</button>
+</form>
