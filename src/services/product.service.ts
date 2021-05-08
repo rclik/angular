@@ -1,4 +1,4 @@
-import { HttpClient, HttpErrorResponse } from '@angular/common/http';
+import { HttpClient, HttpErrorResponse, HttpHeaders } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { Observable, throwError } from 'rxjs'
 import { tap, catchError } from 'rxjs/operators';
@@ -13,6 +13,25 @@ export class ProductService {
   getProducts(categoryId?: number): Observable<Product[]> {
     return this.httpClient.get<Product[]>(this.getPath(categoryId)).pipe(
       tap(data => console.log(JSON.stringify(data))),
+      catchError(this.handleError)
+    );
+  }
+
+  addProduct(product: Product): Observable<Product> {
+    console.log("[ProductService.addProduct] method is called");
+
+    const headers = new HttpHeaders({
+      "Content-Type": "application/json",
+      "Authorization": "token"
+    });
+
+    // this object can be created on the function, but to be more clear
+    const options = {
+      headers: headers
+    }
+
+    return this.httpClient.post<Product>(this.path, product, options).pipe(
+      tap(data => console.log("[ProductService.addProduct] Server returned the data" + JSON.stringify(data))),
       catchError(this.handleError)
     );
   }
