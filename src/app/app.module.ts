@@ -11,6 +11,7 @@ import { CategoryComponent } from './category/category.component';
 import { ProductFilterPipe } from './product/product-filter.pipe';
 import { ProductAddClassicFormComponent } from './product/product-add-classic-form/product-add-classic-form.component';
 import { ProductAddReactiveFormComponent } from './product/product-add-reactive-form/product-add-reactive-form.component';
+import { LoginComponent } from './login/login.component';
 
 @NgModule({
   declarations: [
@@ -20,7 +21,8 @@ import { ProductAddReactiveFormComponent } from './product/product-add-reactive-
     CategoryComponent,
     ProductFilterPipe,
     ProductAddClassicFormComponent,
-    ProductAddReactiveFormComponent
+    ProductAddReactiveFormComponent,
+    LoginComponent
   ],
   imports: [
     BrowserModule,
