@@ -1,0 +1,22 @@
+<form [formGroup]="loginForm" class="form-signin" (ngSubmit)="login()">
+    <div class="text-center mb-4">
+        <h1 class="h3 mb-3 font-weight-normal">Login</h1>
+    </div>
+
+    <div class="form-label-group">
+        <input formControlName="userName" type="text" id="idUserNameHtml" name="userNameHtml" class="form-control"
+            placeholder="User Name" required autofocus>
+        <label for="userName">User Name</label>
+    </div>
+
+    <div class="form-label-group">
+        <input formControlName="password" name="userPasswordHtml" type="password" id="inputPassword"
+            class="form-control" placeholder="Password" required>
+        <label for="inputPassword">Password</label>
+    </div>
+
+    <div class="checkbox mb-3">
+    </div>
+    <button class="btn btn-lg btn-primary btn-block" type="submit">Sign in</button>
+    <p class="mt-5 mb-3 text-muted text-center">&copy; 2021-2022</p>
+</form>
