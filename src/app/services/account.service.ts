@@ -9,8 +9,8 @@ export class AccountService {
   constructor() { }
 
   login(user: User) {
-    if (user.name === "rahman" && user.password === "1234") {
-      localStorage.setItem(this.LOCAL_STORAGE_NAME, user.name);
+    if (user.userName === "rahman" && user.password === "1234") {
+      localStorage.setItem(this.LOCAL_STORAGE_NAME, user.userName);
       this.loggedIn = true;
       return true;
     }
@@ -23,5 +23,10 @@ export class AccountService {
 
   isLoggedIn(): boolean {
     return this.loggedIn;
+  }
+
+  logout() {
+    this.loggedIn = false;
+    localStorage.removeItem(this.LOCAL_STORAGE_NAME);
   }
 }
