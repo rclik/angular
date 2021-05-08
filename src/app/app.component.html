@@ -6,7 +6,7 @@
                 <a *ngIf="!isUserLoggedIn(); else showLogoutLink" class="nav-link" routerLink="/loginReactive">Sign
                     in</a>
                 <ng-template #showLogoutLink>
-                    <a class="nav-link" (click)="signOut()">Sign Out</a>
+                    <a class="nav-link" (click)="signOut()" routerLink="products">Sign Out</a>
                 </ng-template>
             </li>
         </ul>
