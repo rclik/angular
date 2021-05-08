@@ -1,9 +1,9 @@
 import { Component, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { Category } from 'src/app/category/category';
-import { AlertifyService } from 'src/services/alertify.service';
-import { CategoryService } from 'src/services/category.service';
-import { ProductService } from 'src/services/product.service';
+import { AlertifyService } from 'src/app/services/alertify.service';
+import { CategoryService } from 'src/app/services/category.service';
+import { ProductService } from 'src/app/services/product.service';
 import { Product } from '../product';
 
 @Component({

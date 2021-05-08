@@ -1,7 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
-import { AlertifyService } from 'src/services/alertify.service';
-import { ProductService } from 'src/services/product.service';
+import { AlertifyService } from 'src/app/services/alertify.service';
+import { ProductService } from 'src/app/services/product.service';
 import { Product } from './product';
 
 @Component({
