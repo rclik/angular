@@ -16,7 +16,7 @@
     </ng-template>
 
     <div *ngFor="let product of products | productFilter: filterText" class="card" style="padding: 15px;">
-        <img src="{{product.imageUrl}}" class="card-img-top" alt="...">
+        <img src="{{product.imageUrl}}" class="card-img-top" alt="..." routerLink="/products/{{product.id}}">
         <div class="card-body">
             <h5 class="card-title">{{product.name}} - {{product.price | currency: "USD": true: "1.2-2" }}</h5>
             <p class="card-text">{{product.description}}</p>
