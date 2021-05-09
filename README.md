@@ -414,3 +414,44 @@ imports: [
 ```
 
 Tam koda bakilabilir.
+
+## Event-Binding Kullanarak Sepete Ekleme Butonuna Islem Yapabilme Yeteneginin Kazandirilmasi.
+
+Html tarafindaki bir input vb. elementlerin event lari (onClick, onMouseOver gibi) component in class inda nasil handle edebiliir?
+
+Ornegin; bir urunu sepete eklme icin bir buton ekledik. Bu butona basinca bu urun sepete eklenmesini istiyoruz. Bu islemi yapabilmek icin normalde, html de normal bir buton olusturduktan sonra, onClick event ine bind olan bir JS fonksiyonu kullanacaktik. Ama Angular in kendisinin ayri bir html yapisi oldugu icin, bu islemi Angular in anlayacagi sekilde yapmamiz gerekir. Iki islemde de yapilan islemler aynidir. Ama yapilma sekilleri farklidir;
+
+Butonun yerine bir `a` tag i kullanalim. Sonrasinda bu `a` tag inin click event ine bind olmak icin ise asagidaki gelisitirmeyi ekleyelim.
+
+```html
+<a (click) = "addToCart()" class="btn btn-primary">Add to Cart</a>
+```
+
+Burada dikkat edilmesi gereken, `click` event ine bind olmak icin kullanilan parantezlerdir. `(click) = "addToCard()"` bu sekilde `a` taginin click eventine bind oluyoruz cunku Angular in anlayacagi bir gelistirme yapiyoruz.
+
+Sonuc olarak soyle bir kod ortaya cikiyor.
+
+```html
+<div class="row">
+<ng-template #noProduct>
+    <div class="alert alert-primary" role="alert">
+    Bu kategory de urun bulunamadi
+    </div>
+</ng-template>
+<div *ngFor="let product of products | productFilter : filterText" class="card" style="width: 18rem;">
+    <img [src]="product.imageUrl" class="card-img-top" alt="...">
+    <div class="card-body">
+    <h5 class="card-title">{{product.name | uppercase}} {{product.price | currency: USD: false}}</h5>
+    <p class="card-text">{{product.description}}
+    </p>
+    <a (click) = "addToCart()" class="btn btn-primary">Add to Cart</a>
+    </div>
+</div>
+</div>
+```
+
+Html tarafini hazirladiktan sonra, component class (`product.component.html`) ina, `addToCart` methodunu yazmamiz gerekir. Yoksa hata verecektir. Sonrasinda `a` tagine tiklaninca bu method call edilecektir.
+
+Eger sepete eklenecek urunu de fonksiyona gecmek istersek, sadece `(click) = "addToCart(product)"` seklinde methoda parameter eklememiz yeterlidir. Cunku o **ngIf directive** **closure** `product` object ulasilabilirdir.
+
+Bu arada bu islem, `(click) = "addToCart()"` one-way-binding olarak gecer. Sadece template kismindan class kismina gecis saglanir.
