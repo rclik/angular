@@ -415,7 +415,7 @@ imports: [
 
 Tam koda bakilabilir.
 
-## Event-Binding Kullanarak Sepete Ekleme Butonuna Islem Yapabilme Yeteneginin Kazandirilmasi.
+## Event-Binding Kullanarak Sepete Ekleme Butonuna Islem Yapabilme Yeteneginin Kazandirilmasi
 
 Html tarafindaki bir input vb. elementlerin event lari (onClick, onMouseOver gibi) component in class inda nasil handle edebiliir?
 
@@ -455,3 +455,195 @@ Html tarafini hazirladiktan sonra, component class (`product.component.html`) in
 Eger sepete eklenecek urunu de fonksiyona gecmek istersek, sadece `(click) = "addToCart(product)"` seklinde methoda parameter eklememiz yeterlidir. Cunku o **ngIf directive** **closure** `product` object ulasilabilirdir.
 
 Bu arada bu islem, `(click) = "addToCart()"` one-way-binding olarak gecer. Sadece template kismindan class kismina gecis saglanir.
+
+## 3rd Party JS Library lerinin Application a Eklenmesi
+
+*Application* larda, **3rd party JS library** leri eklenmesi gerekebilir. Ornek olarak bizim uygulamamizda *AlertifyJs* i application imiza ekleyecegiz.
+
+AlertifyJs, pop-up olarak mesaj gostermeyi saglayan bir kutuphanedir.
+
+Ilk olarak uygulamamiza AlertifyJs kutuphanesinin eklenmesi gerekir. Bu islem package.json a eklenerek de yapilabilir, ya da ayni dizinde;
+
+>npm install alertifyjs
+
+Library eklendikten sonra node_modules un altina library kodlari gelir.
+
+AlertifyJs adi ustunde js library sidir. Ayrica icinde css de barindirir. Yani JS ve CSS dosyalarinin da uygulamaya eklenmeesi gerekir. Bu dosyalarin uygulamanin her tarafindan ulasilabilir olmasi icin ikisi de global olarak eklenmesi gerekir. Bundan once bootstrap ve font-awesome library lerinin CCS lerini eklemistik (genel style.css dosyasina). Ama burada durum biraz farkli. Cunku angular da style.css gibi genel bir js dosyasi yok. Onun icin, genel style.css dosyasinin project e tanimlandigi yere yani angular.js dosyasini aciyoruz. Bu dosya src dosyasiyla ayni yerdedir. Bu dosya project hakkindaki tum dosyalari tutar. Genel style.css dosyasi da onlardan biridir.
+Orada;
+
+```html
+....
+        "styles": [
+            "src/styles.css"
+        ],
+        "scripts": [],
+        "es5BrowserSupport": true
+    },
+....
+```
+
+Burada gordugumuz sudur, global **styles.css** dosyasi, project e `styles` tanimlanmistir. Benzer sekilde AlertifyJs in JS dosyasini da projeye `scripts` property si araciligiyla eklenebilir.
+
+```html
+....
+        "styles": [
+            "src/styles.css"
+        ],
+        "scripts": ["./node_modules/alertifyjs/build/alertify.min.js"],
+        "es5BrowserSupport": true
+    },
+....
+```
+
+Folder in yerini ise AlertifyJs in sitesinden de bulabilirsin ama *node_modules* un altindan da bulabilirsin.
+
+Sonra AlertifyJs icin gerekli olan css dosyalarini da import edelim. Tabii bunlari genel *style.css* dosyasina direk import edicez:
+
+```css
+    @import '~alertifyjs/build/css/themes/bootstrap.min.css';
+    @import '~alertifyjs/build/css/alertify.min.css'
+```
+
+Bu sekilde AlertifyJs in JS ve CSS dosyalarini projeye ekledik. Simdi, sepete bir urun eklendiginde islemi pop-up ile ekranda gosterelim. Onu da `product.component.ts` icerisinde `alertify` object ine ulasarak yapicagiz. Ama simdi `alertify` e nasil ulasiriz, onu bulmamiz lazim. O da soyle, `declare` keyword u ile yapiyoruz. Bu keyword, 3rd party library lerde bulunan object lere bakilirak map leme islemi yapilir. `product.component.ts` de global olarak tanimi ekleyelim;
+
+```typescript
+declare let alertify: any;
+```
+
+Sonrasinda artik alert yerine `alertify.success` method unu kullanarak ekranda pop-up un gosterilmesini sagliyoruz.
+
+```typescript
+...
+
+declare let alertify: any;
+
+@Component({
+  selector: 'app-product',
+  templateUrl: './product.component.html',
+  styleUrls: ['./product.component.css']
+})
+export class ProductComponent implements OnInit { 
+
+  success(message: string): void {
+    alertify.success(message);
+  }
+...
+```
+
+> **Dikkat**, yeni bir library eklendiginde, project in build edilmesi gerekiyor. Bu yuzden ng serve u kapatip acmak gerekiyor. Yani terminal den restart lazim.
+
+JS ler icin de genel bir JS file i olsa ne olurdu? JS de bir JS file dan baska JS file i import etmek normalden zor bir islem oldugu icin bu sekilde yapislar JS in module yapisi kullanilmasi gerekir. Yoksa sorunlar cikabiliyor. Diger method lar ise biraz zorlama gibi. ama yine de arastirilabilir.
+
+## Angular Service Kullanrak AlertifyService Yazilmasi
+
+Bir fonksiyonalitenin tekrar tekrar, farkli component ler tarafindan kullanilabilirligi arttirmak icin Angular `service` ler kullanilir.
+Javadaki service yapisiyla benzerdir, singleton veya component specific olabilir.
+
+Uygulama icin;
+
+- App altina yeni bir folder create et, ismi `services` olsun.
+- Sonra services folder ina locate olduktan sonra su komut kos:
+    ng g service alertify
+
+ng komutunu kostuktan sonra neler oldu:
+
+- <service_name>.service.spec.ts adinda service test class i olusturuldu.
+- <service_name>.service.ts adinda da bir service class i olusturuldu.
+- olusturululan service ismi is <service_name>Service olarak olusturuldu. Bizim senaryomuzda: *AlertifyService*
+
+Bu sekilde bir service nasil yazildigini gormus olduk. Simdi AlertifyJs icin bir service yazalim, cunku AlertifyJs tum component lar tarafindan kullanilibilir olmasini istiyoruz.
+
+### Angular Service Incelenmesi
+
+*Service* bir class dir, bu class *Injectable* decorerator ini icerir. *Injectable* declaration icinde **providedIn** property si bulunur. Bu da bu object in hangi scope da olusturulacagini soyler. Ornegin bu service root icin, yani global olarak eklenmistir (Application da bir tane, Singleton gibi). Service component bazli olarak da olusturulabilir.
+
+Her service i global yapsak? Olmaz, birincisi gereksiz yere object tutabiliriz. Ikincisi bazi component larin service lerde yaptigi is, kendisine ozel kalmasi gerekebilir. Bu durumda da sorun olurdu.
+
+Tamam, simdi **AlertifyService** inin success fonksiyonu olustur. Oraya bir mesaj gonder, onu da alerify object ini kullanarak ekrana bastir. Alertify object ini declare etmistin, daha once yaptigimiz gibi.
+
+```typescript
+import { Injectable } from '@angular/core';
+
+declare let alertify: any;
+
+@Injectable({
+  providedIn: 'root'
+})
+export class AlertifyService {
+
+  constructor() { }
+
+  success(message: string): void {
+    alertify.success(message);
+  }
+
+}
+```
+
+Service i yazdim, simdi bunu bir *component* dan kullanmamiz gerekiyor. Bu islem icin **AlertifyService** ini kullanicagimiz component class ina inject etmemiz gerekiyor. Sonradainda service function larini component dan kullanilabilir hale gelicegiz.
+
+**Dependency injection** icin *component* class inin constructor una parametre olarak bu service i vericegiz. Sonra Angular component constructor unda service parametresini gorunce, ilk olarak kendi class indaki `@Component` declaration inin `providers` property sinie bakicak. Eger bu service orada tanimlanmissa, component *a ozel bir tane service* **(local service)** olusturacak sonra da component a inject edicektir. Eger yoksa, projenin nin global context inde bu service object i tanimlanmis mi diye bakicak. Eger tanimlanmissa, o object i component a inject edecektir. Eger global da da yoksa hata verecektir. Ornegin `product.component.ts`
+
+```typescript
+        ....
+        constructor(private alertifyService: AlertifyService){
+
+        }
+        ....
+```
+
+Sonrasinda `product.component.ts` de artik service den ekrana mesaj basicaz:
+
+```typescript
+    ...
+    addToCard(message: string){
+        this.alertifyService.success(mesaj);
+    }
+    ... 
+```
+
+Burada AlerifyJs global bir service oldugu `provider` olarak eklemedik.
+
+Bir service i global olarak eklemek icin;
+
+- `Injectable` declaration icindeki `providedIn` property si service objesinin **root** olarak verebiliriz. Ama bu yeni angular version ininda gecerli. Eskilerde farkli bir yaklasim var.
+- `app.module.ts` class icindeki `NgModule` deki object icindeki `providers` array ine service i ekleyebiliriz. Bu eski yaklasimdir. Ama eger, global service leri bir yerden gormek istersen bu yaklasim daha iyidir. Ornegin `product.component.ts`;
+
+```typescript
+...
+@NgModule({
+  declarations: [
+    AppComponent,
+    ProductComponent
+  ],
+  imports: [
+    BrowserModule,
+    AppRoutingModule,
+  ],
+  providers: [AlertifyService],
+  bootstrap: [AppComponent]
+})
+export class AppModule { }
+...
+```
+
+> Ikinci yontem ile service i tanimlasan bile, Injectable declaration ini kaldirmaman gerekir, cunku Angular, service i bu annotation ile taniyor.
+
+Bir service i local olarak eklemek icin ise; *component* class indaki `@Component` declaration ina providers property sine eklenir.
+
+```typescript
+        ...
+        @Component({
+            selector: 'app-product',
+            templateUrl: './product.component.html',
+            styleUrls: ['./product.component.css'],
+            providers:[AlertifyService]
+        })
+        ...
+```
+
+### Global ve Local Service Farkliliklari
+
+Global service, browser dan application acildiginda, kullanilip kullanilmayacagina bakilmaksizin Angular tarafindan olusturulur ve global context e eklenir. Bir tane instance i vardir.
+
+Local service ise component specific olusturulurlar. Burada onemli bir nokta var; eger component specific bir service i kullaniyorsan, her component icin ayri service object i olusturulur. Buna dikkat. Yoksa farkli sonuclar alinabilir.
