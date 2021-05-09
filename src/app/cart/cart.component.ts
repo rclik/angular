@@ -28,4 +28,16 @@ export class CartComponent implements OnInit {
     this.cartService.removeItem(item);
   }
 
+  calculateTotalPrice(): number {
+    let total = 0;
+
+    const getPriceOfItem = (item: CartItem): number => {
+      return item.quantity > 1 ? item.product.price * item.quantity : item.product.price;
+    }
+
+    this.cartItems.forEach(cartItem => total += getPriceOfItem(cartItem));
+
+    return total;
+  }
+
 }
