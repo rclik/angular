@@ -20,4 +20,20 @@ export class CartService {
     console.debug("[CartService.addProductToCart] current state: " + JSON.stringify(cartItems));
     console.debug("[CartService.addProductToCart] current item count: " + cartItems.length);
   }
+
+  getCart(): Array<CartItem> {
+    return cartItems;
+  }
+
+  removeItem(item: CartItem): void {
+    cartItems.filter((cartItem, index) => {
+      if (cartItem.product.id === item.product.id) {
+        if (cartItem.quantity > 1) {
+          cartItem.quantity -= 1;
+        } else {
+          cartItems.splice(index, 1);
+        }
+      }
+    });
+  }
 }

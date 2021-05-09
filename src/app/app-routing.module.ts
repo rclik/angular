@@ -1,5 +1,6 @@
 import { NgModule } from '@angular/core';
 import { RouterModule, Routes } from '@angular/router';
+import { CartComponent } from './cart/cart.component';
 import { LoginClassicFormComponent } from './login/login-classic-form/login-classic-form.component';
 import { LoginReactiveFormComponent } from './login/login-reactive-form/login-reactive-form.component';
 import { LoginGuard } from './login/login.guard';
@@ -16,7 +17,8 @@ const routes: Routes = [
   { path: "product-add-reactive", component: ProductAddReactiveFormComponent, canActivate: [LoginGuard] },
   { path: "login", component: LoginClassicFormComponent },
   { path: "loginReactive", component: LoginReactiveFormComponent },
-  { path: "products/:productId", component: ProductDetailsComponent }
+  { path: "products/:productId", component: ProductDetailsComponent },
+  { path: 'cart', component: CartComponent }
 ];
 
 @NgModule({

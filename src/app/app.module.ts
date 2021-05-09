@@ -16,6 +16,7 @@ import { LoginGuard } from './login/login.guard';
 import { LoginClassicFormComponent } from './login/login-classic-form/login-classic-form.component';
 import { LoginReactiveFormComponent } from './login/login-reactive-form/login-reactive-form.component';
 import { ProductDetailsComponent } from './product/product-details/product-details.component';
+import { CartComponent } from './cart/cart.component';
 
 @NgModule({
   declarations: [
@@ -29,7 +30,8 @@ import { ProductDetailsComponent } from './product/product-details/product-detai
     LoginClassicFormComponent,
     LoginClassicFormComponent,
     LoginReactiveFormComponent,
-    ProductDetailsComponent
+    ProductDetailsComponent,
+    CartComponent
   ],
   imports: [
     BrowserModule,
