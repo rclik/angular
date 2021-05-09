@@ -1,5 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
+import { CartService } from 'src/app/cart.service';
+import { AlertifyService } from 'src/app/services/alertify.service';
 import { ProductService } from 'src/app/services/product.service';
 import { Product } from '../product';
 
@@ -7,14 +9,16 @@ import { Product } from '../product';
   selector: 'app-product-details',
   templateUrl: './product-details.component.html',
   styleUrls: ['./product-details.component.css'],
-  providers: [ProductService]
+  providers: [ProductService, CartService]
 })
 export class ProductDetailsComponent implements OnInit {
 
   private product!: Product;
 
   constructor(private activatedRoute: ActivatedRoute,
-    private productService: ProductService) { }
+    private productService: ProductService,
+    private alertifyService: AlertifyService,
+    private cartService: CartService) { }
 
   ngOnInit(): void {
     this.getProductIdFromUrl();
@@ -36,7 +40,8 @@ export class ProductDetailsComponent implements OnInit {
   }
 
   addToCart(product: Product): void {
-    console.log("[ProductDetailsComponent.addToCart] method is called");
+    this.alertifyService.success(`${product.name} sepete eklendi.`);
+    this.cartService.addProductToCart(product);
   }
 
 }
