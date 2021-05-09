@@ -15,6 +15,7 @@ import { AccountService } from './services/account.service';
 import { LoginGuard } from './login/login.guard';
 import { LoginClassicFormComponent } from './login/login-classic-form/login-classic-form.component';
 import { LoginReactiveFormComponent } from './login/login-reactive-form/login-reactive-form.component';
+import { ProductDetailsComponent } from './product/product-details/product-details.component';
 
 @NgModule({
   declarations: [
@@ -27,7 +28,8 @@ import { LoginReactiveFormComponent } from './login/login-reactive-form/login-re
     ProductAddReactiveFormComponent,
     LoginClassicFormComponent,
     LoginClassicFormComponent,
-    LoginReactiveFormComponent
+    LoginReactiveFormComponent,
+    ProductDetailsComponent
   ],
   imports: [
     BrowserModule,

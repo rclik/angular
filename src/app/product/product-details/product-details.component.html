@@ -1,0 +1,12 @@
+<div *ngIf="getProduct; else noProduct">
+    <img src="{{getProduct.imageUrl}}" class="card-img-top" alt="...">
+    <div class="card-body">
+        <h5 class="card-title">{{getProduct.name}} - {{getProduct.price | currency: "USD": true: "1.2-2" }}</h5>
+        <p class="card-text">{{getProduct.description}}</p>
+        <a (click)="addToCart(getProduct)" class="btn btn-primary">Sepete Ekle</a>
+    </div>
+</div>
+
+<ng-template #noProduct>
+    Product not found.
+</ng-template>

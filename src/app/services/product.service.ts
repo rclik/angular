@@ -17,6 +17,13 @@ export class ProductService {
     );
   }
 
+  getProductWithId(productId: number): Observable<Product> {
+    return this.httpClient.get<Product>(this.path + "/" + productId).pipe(
+      tap(product => console.log("[ProductService.getProductWithId] returned product: " + JSON.stringify(product))),
+      catchError(this.handleError)
+    );
+  }
+
   addProduct(product: Product): Observable<Product> {
     console.log("[ProductService.addProduct] method is called");
 

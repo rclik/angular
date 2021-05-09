@@ -5,6 +5,7 @@ import { LoginReactiveFormComponent } from './login/login-reactive-form/login-re
 import { LoginGuard } from './login/login.guard';
 import { ProductAddClassicFormComponent } from './product/product-add-classic-form/product-add-classic-form.component';
 import { ProductAddReactiveFormComponent } from './product/product-add-reactive-form/product-add-reactive-form.component';
+import { ProductDetailsComponent } from './product/product-details/product-details.component';
 import { ProductComponent } from './product/product.component';
 
 const routes: Routes = [
@@ -14,7 +15,8 @@ const routes: Routes = [
   { path: "product-add-classic", component: ProductAddClassicFormComponent, canActivate: [LoginGuard] },
   { path: "product-add-reactive", component: ProductAddReactiveFormComponent, canActivate: [LoginGuard] },
   { path: "login", component: LoginClassicFormComponent },
-  { path: "loginReactive", component: LoginReactiveFormComponent }
+  { path: "loginReactive", component: LoginReactiveFormComponent },
+  { path: "products/:productId", component: ProductDetailsComponent }
 ];
 
 @NgModule({
