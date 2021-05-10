@@ -1352,3 +1352,31 @@ Yukaridakilere ek olarak, validation islemini yaparken, angular form objectinin 
     }
     ...
 ```
+
+## Login Islemleri icin Component Olusturulmasi
+
+Urunu ekeleyebilmek icin oncelikle login olmasi gerekir, onun icin login sayfasi yazmamiz lazim oncelikle, sonrasinda ise application uzerindeki islemler icin yetkilendirme yapilabilir.
+
+Login sayfasi icin;
+
+- Component i olustur, tabii `app` folder i altinda:
+
+> ng g component login
+
+- Ilk olarak route a ekleme yapalim;
+  - `app-routing-module.ts` deki routes constant ina eger biri login path i ile gelirse onu login component ina yonlendir dememiz lazim.
+  - Sonrasinda bu route linkini call edecek bir link tanimlama, `app.component.html` de, sonra sign out u bul, onun yerine login olarak degistir bunu router link ini de degistir, login e gitsin,
+
+```html
+    ...
+        <li class="nav-item text-nowrap">
+            <a class="nav-link" routerLink="/login">Login</a>
+        </li>
+    ...
+```
+
+Html formlarini olusturabilmek icin bootstrap den `floating-labels` e git, oradaki login sayfasinin kopyala. Sayfa kaynagini goster, form un kapanisina kadar kopyala, login.component.html e yapistir, oradaki css i de ilgili css dosyasina yapistir. login.component.css
+
+Artik ekran ayni sayfayi ekranda gorebilirsin.
+Sonra bazi temizlikleri yap html uzerinde
+Remember me yi kaldir. Simdilik o yetenegimiz yok.
