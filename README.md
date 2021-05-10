@@ -1149,3 +1149,64 @@ Simdi buton ekleyelim. Bu da html button dan ilerleyerek yapicaz
 ```
 
 Bir urun ekleme butonumuz var. **type** i ise **submit** class ini da bootstrap den aliyoruz. Bi de form valid olmadigi surece tiklanilmaz yapiyoruz. (Sanirim icindeki tum required field larin doldugunda form valid oluyor.)
+
+## POST ile Server a Urun Ekleme
+
+Urun ekliyecez, bunun icin oncelikle **ProductService** inde urun ekleme icin bir service olmali. Bunun icin ilk olarak product service ine addProduct method u yaziyoruz.
+
+**ProductService** ine ekleme yaparken, HTTP POST method u kullanicaz. **json-server** eklemeye de izin veriyor bu arada.
+
+**httpClient** in **post** method u 3 tane parametre aliyor. Bunlardan ilki **url**, hangi url e request edilecegi, ikincisi **request body si icin hangi object** i kullanacagimiz, ucuncusu ise *optional* olarak **httpOptions** object i. Bu object in icinde http header lari eklenebilir. Http header object i icinde de atilacak http request icin header bilgileri eklenebilir. Biz ise Content-Type ve Authorization header larinin dolu gitmesini istiyoruz. onun icin httpOptions icindeki httpHeaders object ini dolduruyoruz.
+
+```typescript
+...
+
+addProduct(product: Product): Observable<Product> {
+    const httpOptions = {
+      headers: new HttpHeaders({
+          'Content-Type': 'application/json',
+          'Authorization': 'Token'
+      })
+    };
+
+    return this.httpClient.post<Product>(this.path, product, httpOptions).pipe(
+      tap(data => console.log('In tap function: ' + JSON.stringify(data))),
+      catchError(this.handleError)
+    );
+}
+....
+```
+
+Sonunda boyle bir method u elde etmis oluyoruz. Yine response olarak bir **Product** object i dondurdugumuzu soylememiz lazim. Onu da belirtiyoruz. Server in yetenegine bagli birsey bu.
+
+Sonra bu method u ise component dan cagiriyoruz, `product-add-classic-form.component.ts` deki *addProduct* method u icinde. Oncelikle ProductService ini inject etmemiz lazim. Sonra ProductService inin addProduct ini call edip ona subscribe olmamiz lazim.
+
+Subscribe sonucunda da alertify service ile eklenen product in alert ini basalim.
+
+```typescript
+    ...
+    add(form: NgForm) {
+        this.productService.addProduct(this.model).subscribe(data => {
+          this.alertifyService.success( data.name + ' isimli urun eklendi.')
+        });
+        // burada html den bilgiyi cekmek istersek htmlName indan almamiz gerekiyor, yoksa gelmez, id ile cekemiyoruz.
+        // console.log("Eklenecek urun adi: " + form.value.htmlName);
+        // console.log("Eklenecek urun kategory idsi: " + form.value.htmlCategoryName);
+    }
+    ...
+```
+
+Burada form object ini hic kullanmadik, aslinda bunu gostermemizin sebebi nasil yapilabilecegi uzerine idi.
+Tabii service leri ekledikten sonra component declaration ininda providers array ine eklemeyi unutma.
+
+Ekledigimiz resmin buyuklugu fazla oldu. simdi resmin boyutlarini ayni hale getirelim:
+
+```css
+img {
+    width: 200px; /* You can set the dimensions to whatever you want */
+    height: 200px;
+    object-fit: cover;
+}
+```
+
+Bunu da product component inin css ine eklemeiz lazim. ve de card div indeki ufak bir css i kaldirdik. yoksa yine uzun gorunuyordu. `style="width: 18rem;"`
