@@ -798,3 +798,103 @@ Sonra bunun genel global bir service degil de local service olmasi icin *Injecta
 Sonra *CategoryService* ini inject ediyoruz category component ina.  
 Sonrasinda ise *CategoryService* inde *getCategories* method unu yaziyoruz.
 Sonrasinda httpClient i import edip kategorilerin cekilecegi method u yazdim. Bu metoda *pipe* i dolayisiyla *tap* ve *catchError* method unu yazdik.
+
+## Routing Mimarisi ile Calismak
+
+Bir link e tikladigimizda baska bir component in gosterilmesini **route** ile saglariz.
+
+Bu islem icin **RouteModule** unun uygulamaya eklenmesi lazim. Bu module projeyi olustururken eklenmisti. Routing islemlerini saglayan dosya ise `app-routing.module.ts` file idir.
+
+AppRoutingModule eklernirken,
+
+- AppRoutingModule (`app-routing.module.ts`) adinda bir class olusturulur, bu class *@NgModule* declaration ini sahip ve bu declaration icine bir *routes array* i import edilmis (bu sekilde eklenen route lari project e ekliyor), bir de kendisini export etmis:
+
+```typescript
+...
+const routes: Routes = [];
+
+@NgModule({
+imports: [RouterModule.forRoot(routes)],
+exports: [RouterModule]
+})
+export class AppRoutingModule { } 
+...
+```
+
+Sonra tiklanildiginda gosterilecek component ana component html inde bulunan, `<router-outlet></router-outlet>` tag i icerisine eklenir. Bu sekilde ekranda gosterilir.
+
+Bir route eklemek icin yapilcak is, routes objesine kurallar eklemektir. Ornegin, product component icin bir route yazalim;
+
+```typescript
+  const routes: Routes = [
+      {path:'products', component: ProductComponent}
+  ];
+```
+
+Bu sunu soyluyor, url e `http://localhost:4200/products` gelince bu component in load edilecegini soyluyor angular a.
+
+URL e hicbirsey yazmamissa products a yonlendirilmesini saglayabiliriz. (`http://localhost:4200/`)
+Burada onemli bir nokta var, eger url e sacma birsey yazarsak ana sayfaya yonlendiliyor, ama sadece url e hicbirsey yazmayinca products a gitmesi icin bir parametre daha kullanmammiz lazim. Bunu **pathMatch='full'** property siile yaparabilriz
+
+```typescript
+    const routes: Routes = [
+        {path:'products', component: ProductComponent},
+        {path:'', redirectTo:'products', pathMatch='full'}
+    ];
+```
+
+### Routing mimarisinin nasil calistir?
+
+Aslinda AppRoutingModule `app.module.ts` de import edilmis. Yani angular a bizim routing module umuz budur denmis. tamamdir, Angular Routing Module den bu sekilde haberdar olmus, burasi ok.
+
+Simdi eger url den bir path yazilinca angular nasil calisiyor onu anlayalim. URL den path i aliyor. Sonra *AppRoutingModule* deki *routes array property* si icerisindeki route lara bakiyor. Ilk basta route array inde birsey olmadigindan `index.html` uzerinden `app-root` u cagiriyor. `app-root` icindeki `app.component.html` i load ediyor. `app.component.html` icinde bir tane tag var:
+
+```html
+  ...
+      <router-outlet></router-outlet>
+  ...
+```
+
+Buna dikkat. Eger load edicek bir route u varsa o route icin kullanilcak component i bu router-outlet tag i icinde load ediyor.
+
+Buraya kadar, onun icin ilk route array ini doldurdugumuz da iki tane product component i cikti. 
+
+```html
+  <!-- newly added components are here -->
+  <app-nav></app-nav>
+  <!-- main div -->
+  <div class="row">
+      <!-- category div -->
+      <div class="col-md-2">
+          <app-category></app-category>
+      </div>
+      <!-- product div -->
+      <div class="col-md-10">
+          <app-product></app-product>
+      </div>
+  </div>
+
+  <router-outlet></router-outlet>
+```
+
+Cunku hem `router-outlet` icinde hem de `app-product` tag i icinde product component i load ediliyor.
+
+Bu ikili goruntuyu kaldirmak icin `app-product` tag i siliyoruz, onun yerine `router-outlet` i koyuyoruz:
+
+```html
+    <!-- newly added components are here -->
+    <app-nav></app-nav>
+    <!-- main div -->
+    <div class="row">
+        <!-- category div -->
+        <div class="col-md-2">
+            <app-category></app-category>
+        </div>
+        <!-- product div -->
+        <div class="col-md-10">
+            <router-outlet></router-outlet>
+        </div>
+    </div>
+```
+
+Bu sekilde ProductCompnent inin iki kez ekranda gosterilmesi sorununu kaldirdik.
