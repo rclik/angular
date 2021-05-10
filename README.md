@@ -1210,3 +1210,145 @@ img {
 ```
 
 Bunu da product component inin css ine eklemeiz lazim. ve de card div indeki ufak bir css i kaldirdik. yoksa yine uzun gorunuyordu. `style="width: 18rem;"`
+
+## Reactive Form ile Urun Ekleme
+
+Reactive form, yeni form library si. Avantaji ise validation islemini component de yapmak, boylece form islemlerini tek bir merkezden yonetibilecegiz. Ayrica bu da bize validation kisminin unit testlerinin yapilabilmesini saglayacaktir. Hemen ise koyulalim;
+
+Reactive form component ini olusturalim. Bunu yine product folder i icinde yapmamiz daha iyi olur;
+
+> ng g component product-add-reactive-forms
+
+Reactive form olusturabilmek icin component da iki temel objemiz olmasi lazim:
+
+- FormBuilder
+  Bu service degil sadece bir library, bunu service gibi inject etmemiz gerekiyor.
+  Bu obje html input larinin olusurulmasi ve validation larinin yapilmasi islemlerini yapmak icin kullanilir.
+- FormGroup
+  Bunu class property si olarak tanimliyoruz.
+  Bu object ise iliskilendirilen form dan gelen data yi tutacak. Bir template gibi.
+
+Sonrasinda html tarafindaki form ile iliskilendilmesi ve vaidation icin component tarafinda **createAddProductForm** method unu yaziyoruz. Icinde de form u html ile birlestirip validation larla birlikte form u kullanima hazir hale getirecez.
+
+```typescript
+...
+export class ProductAddReactiveFormsComponent implements OnInit {
+    productAddForm: FormGroup;
+    model : Product = new Product();
+
+    constructor(private formBuilder: FormBuilder) { }
+
+    ngOnInit() {
+        this.createAddProductForm();
+    }
+
+    createFormGroup(): void {
+        this.productAddForm = this.formBuilder.group({
+          name: ["", Validators.required],
+          description: ["", Validators.required],
+          imageUrl: ["", Validators.required],
+          price: ["", Validators.required],
+          categoryId: ["", Validators.required]
+        });
+    }
+
+    add(){
+        if(!this.productAddForm.invalid){
+            this.model = Object.assign({}, this.productAddForm.value); 
+        }
+    }
+}
+...
+```
+
+Buradaki **createFormGroup** method u bir tane Angular Form yaratiyor. Buradaki onemli nokta, group methodu icerisine alinan object tir. Bu object in icinde html tarafinda aranacak input value lari ve validation kurallari bulunur.
+Sonrasinda ise, html tarafinda buradaki property name lerine karsilik gelecek html input lari hazirlayacagiz.
+
+Simdi ise html kismina gecelim;
+
+- h3 ekleyelim, ismini verelim
+- Yine bir html form yaratalim. Bu kere component class indaki **formGroup object ile bunu iliskilendirme yapmamiz lazim**. Bunun icin property assignment yapmak lazim. Sonrasinda ise submit sonrasinda class metodunun cagirilmasini saglamak lazim.
+
+```html
+  <form [formGroup]="productAddForm" (ngSubmit)="add()">
+```
+
+**productAddForm** component class inda `FormGroup` tipinde class property si olarak tanimlanmis olmalidir. Submit islemi icin de class da method eklenmis olmalidir.
+
+Simdi ise biraz css ler, `form-group`, `form-control`
+
+Sonra yine bir div icinde input ve validation sorunu olunca hatayi gosterecegimiz baska bir div olusturuyoruz.
+
+Bir hata aldik, cunku `ReactiveFormModulde` unun eklenmesi lazim project e, onu da `app.module.ts` de ekliyoruz. Bu hatayi, `[formGrup]="productAddForm"` assignment indan sonra aldik. Cunku `formGroup` property si, `ReactiveFormModulde` ile kullanilabilir oluyor.
+
+Ayrica routing i de duzeltmemiz lazim. Onu da `app-routing.module.ts` de yapiyoruz. Cunku `ReactiveForm` ile product ekle butonuna basinca yeni yazilan component a gitmesi icin.
+
+```html
+  <h3>Yeni Urun Ekle - Reactive</h3>
+  <form [formGroup]="productAddForm" (ngSubmit)="add()">
+  <div class="form-group">
+      <input type="text" id="name" formControlName="name" class="form-control" placeholder="Urun Adi">
+      <div class="alert alert-danger" *ngIf="productAddForm.get('name').hasError('required') && productAddForm.get('name').touched">Urun zorunludur</div>
+  </div>
+  </form>
+```
+
+Simdi bu kod u inceleyelim:
+
+- Form u component class indaki formGroup object i ile iliskilendirme icin, `<form [formGroup]="productAddForm" ...` ile yapiyoruz
+- Submit action i icin ise classic yontemde oldugu gibi, parametreye gerek yok cunku onu `formGroup` uzerinden alicagiz. `(ngSubmit)="add()"` de hallediyoruz.
+- Component daki *formGroup* un icindeki object property name ini *formControlName* ile veriyoruz. Bu sekilde html tarafi ile class tarafi iliskilendirilmis oldu. Iki tane form olmadigindan ki olsa bile hangi form un icindeyse o form un icindeki name object ini alir.
+  
+```html
+  <input type="text" id="name" formControlName="name" class="form-control" placeholder="Urun Adi">
+```
+
+- Validation hatasi olunca ekrana bilgilendirme yapmak icin ise yine bir div olusturuyoruz. Eski yapiyla buyuk olcude ayni ama bu kere validation yaparken *ngIf* expression i biraz farkli. `*ngIf="productAddForm.get('name').hasError('required') && productAddForm.get('name').touched"`. Yani bu kere angular tarafindaki **productAddForm** undan value aliyoruz, get method u ile. bunun required error u var mi diye bakiyoruz, ve de touched mi diye bakiyoruz.
+
+Bu kadar. Geri kalan property ler icin de ayni islemleri yapiyoruz.
+
+Category ve button icin;
+
+- CategoryService ini import ediyoruz, dikkat et local olsun, yani providers icine yazilmasi gerekiyor
+- Sonrasinda Category array cinsinde bir tane class property si tanimliyoruz. Bunu da server ngOnInit method unda dolduruyoruz, CategoryService ini kullanarak.
+- Sonrasinda ise html tarafinda ayni eskisi gibi bir *html select* tag i kullanicaz, icinde bir tane *html option* tag i olmasi yeterli. Bu option tag ini cogullayacaz. **formControlName** olarak select tag ini kullanicaz. Cunku *option* dan gelicek olan value yu o tutacak, onu da *categoryId* ye assign edicez. Genel olarak bu kadar, bi de html id ve name property lerini verebiliriz. Bir de her field icin yaptigimiz gibi eger field requirement lerine uymayinca bir div icerisinde error response unu donmemiz lazim:
+
+```html
+    ...
+    <div class="form-group">
+        <select class="form-control" formControlName="categoryId" required id="categoryId" name="categoryId">
+          <option *ngFor="let category of categories" [value]="category.id">{{category.name}}</option>
+        </select>
+        <div *ngIf="productAddForm.get('categoryId').hasError('required') && productAddForm.get('categoryId').touched" class="alert alert-danger">
+          Urun kategorisi boş bırakılamaz
+        </div>
+    </div>
+    ...
+```
+
+Burada onemli olan ise, validation inin component tarafinda yapilmasindan sonra alert basacagimiz div in if method unda nasil error basildigini yakalamak. Onu da form object i uzerinden get ile object ini alarak basliyoruz, sonrasinda ise hasError method uyla check ediyoruz, o kadar.
+
+Baska bir onemli nokta ise option html tag inin value sunun nasil verildigi, onu da `[value]` ile veriyoruz. Bu property assignment olarak geciyor.
+Ayni islemi daha uzun sekilde yapabiliriz; `value = "{{category.id}}"`
+
+Simdi ise product u ekleyelim.
+
+- Ondan once alerify service ini ekleyelim, alerify service i global oldugundan direk inject edersek yeter. *providers* kismina gerek yok. Onu sonra da add method unda kullandik.
+- Sonra ProductService inin import edilmesi lazim. Onu da local olarak yapalim.
+
+Yukaridakilere ek olarak, validation islemini yaparken, angular form objectinin control lerinden yararlanabiliriz. Anlasilmasi daha kolay birsey olabilir.
+
+```html
+    ...
+    <div class="alert alert-danger" *ngIf="getFormControl.price.errors && getFormControl.price.errors.required && getFormControl.price.touched">
+        Urun Fiyati zorunludur</div>
+    ...
+```
+
+```typescript
+    ...
+      get getFormControl() {
+        return this.productAddForm.controls;
+    }
+    ...
+```
