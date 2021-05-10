@@ -647,3 +647,58 @@ Bir service i local olarak eklemek icin ise; *component* class indaki `@Componen
 Global service, browser dan application acildiginda, kullanilip kullanilmayacagina bakilmaksizin Angular tarafindan olusturulur ve global context e eklenir. Bir tane instance i vardir.
 
 Local service ise component specific olusturulurlar. Burada onemli bir nokta var; eger component specific bir service i kullaniyorsan, her component icin ayri service object i olusturulur. Buna dikkat. Yoksa farkli sonuclar alinabilir.
+
+## JSON Server Yapilandirilmasi
+
+Backhand de data lari cekmek icin buildin bir server kullanalim. Bu islem icin npm package i kullanacagiz. Bu package in ismi, `json-server`. Kurmak icin;
+
+> npm install -g json-server
+
+Kurulumu yaptiktan sonra, serve edilecek data nin olusuturmasi lazim. Bunun icin bir tane `shop.json` olustur. Bu bir *json* object barindirsin. Bu json da endpoint ler ve bu endpoint ler istenince donuecek json data lar olacak.
+
+Kurduktan sonra o json i serve etmek icin:
+
+> json-server --watch shop.json
+
+## REST API Kullanilarak Uygulamaya Bilgi Saglamak
+
+Backend in sundugu data lari uygulamamizda kullanacagiz. Bu islem icin, `HttpClientModule` u kullancagiz. Bu Angular in sundugu bir **module**dur. Ilk olarak onu uygulamada kullanacagimiz Angular a belirtmemiz lazim. Bunun icin **module** u `app.module.ts` kullanarak import edelim:
+
+```typescript
+...
+import { HttpClientModule } from '@angular/common/http';
+...
+
+imports: [
+    BrowserModule,
+    AppRoutingModule,
+    FormsModule,
+    HttpClientModule
+],
+...
+```
+
+Simdi, server tarafindan sunulan urunleri uygulamada gosterelim. Bunu yapmak icin, *ProductComponent* class indaki products property sinin artik server dan alinan data ile guncellememiz gerekiyor. Bu islem icin ilk is, *HttpClientModule* icinde bulunan **HttpClient** sinifinin *ProductComponent* class ina inject edilmesidir.
+
+deki class property olan products i elle vermek yerine rest api uzerinden alicagiz. Bunun icin ise httpclient i product.component.ts e inject etmemiz lazim. `product.component.ts` class inda;
+
+```typescript
+...
+constructor(private alertifyService: AlertifyService, private httpClient: HttpClient) { }
+...
+```
+
+Sonrasinda `httpClient` objesini, class da var olan **ngOnInit** method u icinde yapariz. Cunku bu method component ilk load olurken cagirilir. Bu method ayrica class in impement ettigi OnInit interface inden gelir. `product.component.ts`:
+
+```typescript
+...
+ngOnInit() {
+    this.httpClient.get<Product[]>("http://localhost:3000/products").subscribe(data => { this.products = data });
+}
+...
+```
+
+Bu yapilan islem:
+
+- HttpClient objesinin *get* method una subscribe olmak. Bu su demek; get method u verilen *url* e *HTTP GET* request i atiyor. **subscribe** method u ise atilan request in sonucunda gelen response un subscribe method u icerisine verilen function araciligiyla islenmesini sagliyor.
+- *get* method unun ekledigimi generic class gelen response un product array tipinde oldugunu belirtmek icindir. Bu sekilde subscribe method u icine gelen response data nin Product array ine cast edilir. *Type safety* islemini saglamis olduk.
