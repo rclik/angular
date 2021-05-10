@@ -786,3 +786,15 @@ private handleError(handleError: HttpErrorResponse) {
 
 ...
 ```
+
+## Category Service inin Hazirlanmasi
+
+Ilk olarak service i olusturuyoruz;
+
+> ng g service category
+
+Sonra bunun genel global bir service degil de local service olmasi icin *Injectable* declaration i icindeki object i silinip sonrasinda component icindeki Component declaration ina providers olarak belirtmemiz lazim.
+
+Sonra *CategoryService* ini inject ediyoruz category component ina.  
+Sonrasinda ise *CategoryService* inde *getCategories* method unu yaziyoruz.
+Sonrasinda httpClient i import edip kategorilerin cekilecegi method u yazdim. Bu metoda *pipe* i dolayisiyla *tap* ve *catchError* method unu yazdik.
