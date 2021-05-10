@@ -898,3 +898,75 @@ Bu ikili goruntuyu kaldirmak icin `app-product` tag i siliyoruz, onun yerine `ro
 ```
 
 Bu sekilde ProductCompnent inin iki kez ekranda gosterilmesi sorununu kaldirdik.
+
+## Router Mimarisi Ile Route Edilen Component ler Ulasilmasi
+
+Kategoriler kismindan bilgisayar a tikladigimiz da bilgisayara ait urunlerin gelmesi, elektronik e tikladigimizda elektronik e ait urunlerin gelmesini saglamak istiyoruz.
+
+Soyle bir url olmali olusmali `../products/category/1` veya `../products/category/2`
+
+Burada uc gelistirilmesi gereken nokta var;
+
+- Route kurallarinda bir url parametresi ile bir Component in cagirilmasi saglanmali
+- Uygulama icerisinde istenilen component in gosterilmesine linkin verilmesi ve bu linkin icerisine url paramtresinin saglanmasi.
+- Component in url den gelen parametreyi okumasi
+
+**Ilk engeli** su sekilde asabiliriz. `routes` property sindeki kurali guncelleyelim;
+
+```typescript
+    {path:'products/category/:categoryId', component: ProductComponent}
+```
+
+Buradaki `:` ve sonrasindaki `categoryId`. Buna dynamic sayi bilgi almak diyebiliriz. Buradaki `categoryId` parameter ismi onemlidir. Cunku component tarafindan alinirken kullanilacaktir.
+
+**Ikinci engel** i asmak icin, `/products/category/1` gibi bir url olusturmak ve bu linke tiklanilabilir yapmaktir.
+Ornek olarak kategory component daki for loop u icinde routerLink property sini kullanicaz. One-way binding i de kullanarak categoryId yi html tarafinda kullanicaz:
+
+```html
+  <a class="list-group-item" routerLink='/products/category/{{category.id}}'>{{category.name}}</a>
+```
+
+> RouterLink sadece `a` element ine verilebiliyor.
+
+Ucuncu engel icin bir sonraki basliga bakabilriiz.
+
+## Component larda URL den Gelen Parameter Bilgileri Kullanabilmek: ActivatedRoute
+
+Yukarda da soyledigimiz gibi url deki parametereleri alabilmek icin **ActivatedRoute** u kullanicagiz, bunun kullanimi da oldukca basit, normal bir service kullanir gibi bir object i component a inject edicegiz, sonrasinda **ActivatedRoute** object inin **params property** sine **subscribe** olucaz, degisikliklerden haberdar olmak icin. (Observable mimarisi). Bu islemi ise **ngOnInit** method unda yapicaz:
+
+Ilk olarak, component a git. `product.component.ts` e ActivatedRoute u inject et ve url den parametreyi al.
+
+```typescript
+...
+
+constuctor(private activatedRoute: ActivatedRoute) {}
+
+ngOnInit() {
+    this.activatedRoute.params.subscribe(params => {
+        this.productService.getProducts(params['categoryId']).subscribe(data => {
+            this.products = data; console.log('data has came: ' + JSON.stringify(data));
+        });
+    });
+
+    console.log('onInit finished Loading');
+}
+...
+```
+
+Simdi ise *ProductService* ine alinan param dan *categoryId* yi gondermek is. O da oldukca kolay. **params** map inden **categoryId** li entry nin value sunu aliyoruz. ve onu service a pass ediyoruz
+
+### Kategorileri Ceken Methodun Guncellenmesi
+
+Bazen categoryId bos olarak gelebilir ki bu normak, direk olarak products url ini call edersek browser dan yine product component cagirilacak, o da ayni ngOnInit method unu call edicek, orada da activated route olmayacagindan categoryId service e undefined olarak gidecek. Boyle olmasa bile method un daha kullanisli hale getirilmesi icini categoryId defined ise category sec diyebiliriz:
+
+```typescript
+    ...
+    getProducts(categoryId: string): Observable<Product[]> {
+        let requestPath = categoryId ?  this.path + '?categoryId=' + categoryId : this.path;
+        return this.httpClient.get<Product[]>(requestPath).pipe(
+        tap(data => console.log('In tap function: ' + JSON.stringify(data))),
+        catchError(this.handleError)
+        );
+    }
+    ...
+```
