@@ -1482,3 +1482,20 @@ Simdi component tarafinda login method unu yazalim.
 Login component da ise bizim AccountService inin olmasi gerekiyor, onu provider olmadan inject et, zaten global tanimlamistik. provider a yeniden yazmamamiz lazim.
 
 AccountService uzerinden login method unu call et, ona da this.model i ver, model object i user i barindiriyordu.
+
+## Login ve Logout Butonunun Olusturulmasi
+
+Login butonu `app.component.html` deydi, simdi onu mantiksal olarak eger user giris yapmamissa login, giris yapmissa logout a cevirmemiz lazim. onu yapmak da kolay, `app.component.ts` de AccountService ini inject edeririz eger user login ise signout, login degilse sign in ederiz. bu kadar.
+
+`ng template` ile de yapabilirsin;
+
+```html
+    <li class="nav-item text-nowrap">
+        <a *ngIf="!isUserLoggedIn(); else showLogoutLink" class="nav-link" routerLink="/loginReactive">
+          Sign in
+        </a>
+        <ng-template #showLogoutLink>
+            <a class="nav-link" (click)="signOut()" routerLink="products">Sign Out</a>
+        </ng-template>
+    </li>
+```
