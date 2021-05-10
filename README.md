@@ -1031,3 +1031,121 @@ yeni router link ler ekledikten sonra onlarin da routing ini yapmamiz lazim. onu
 { path: 'product-add-2', component: ProductComponent },
 ...
 ```
+
+## Klasik Formlarla Calismak
+
+Angular da iki cesit form yazilir, birincisi klasik form lar ikincisi reactive formlardir. Simdi klasik formlara bakalim;
+
+Ilk olarak yeni bir tane component eklememiz lazim.
+Onun da product in icinde yapmamiz daha mantikli cunku moduler kod yazmak amacimiz.
+O zaman product folder i icinde;
+
+> ng g component product-add-classic-form
+
+Product eklemek icin kategori bilgisi lazim. Bunun icin kategorileri serverdan cekmek icin **CategotyService** in **ProductAddClassicFormComponent** a inject edilmesi lazim. Bu local bir service olmasini istiyoruz.
+
+Product tipinde bir model object i tanimladik cunku bu object form dan eklenecek product bilgilerini tutacak. `product-add-classic-forms.component.ts:`
+
+```typescript
+  ...
+  @Component({
+  selector: 'app-product-add-classic-forms',
+  templateUrl: './product-add-classic-forms.component.html',
+  styleUrls: ['./product-add-classic-forms.component.css'],
+  providers: [CategoryService]
+  })
+  export class ProductAddClassicFormsComponent implements OnInit {
+    model: Product = new Product();
+    categories: Category[];
+
+    constructor(private categoryService: CategoryService) { }
+
+    ngOnInit() {
+        this.categoryService.getCategories().subscribe(data => this.categories = data);
+    }
+  }
+  ...
+```
+
+Altyapiyi kurduk, simdi klassik formlar kullanarak class daki model objesinin doldurulmasi gerekiyor.
+
+## Klasik Form Isleriyle Ugrasma
+
+Simdi ilk olarak `product-add-class-forms.component.html` i acip, icindekini siliyoruz.
+`h3` ile Yeni urun ekle basligini atiyoruz.
+
+Sonra html form tag ini yaziyoruz. Burada Angular form olarak kullanilabilmesi icin form tag ina `#productAddForm="ngForm"` seklinde bir property veriyoruz. Ve angular tarafinda form umuzun ismi de `productAddForm` olacak. Form isminin onemi yoktur, sadece html sayfasi icerisinde kullanilacak.
+
+Bu form ismi ile component in class insimdi bu form bilgilerini submit etmemiz lazim. Onu da yine `form` tag ina property olarak girecegiz. o da su sekilde `(ngSubmit) = "add(productAddForm)"`. Burada sunu soyluyoruz, form submit edilinice class daki **addProduct** methodu call edilecek. Icersine de **addProductForm** object i pass edilecek.
+
+```html
+...
+    <h3>Yeni Urun Ekle</h3>
+    <form #productAddForm="ngForm" (ngsubmit) = "add(productAddForm)">
+...
+```
+
+Simdi component in class inda add method unu yazalim. Burada add method u NgForm tipinde bir parametre icine alicak.
+
+```typescript
+  ...
+  add(form: NgForm){
+      // form.value form icindeki input larin inputName-value seklinde getirilmesini saglar.
+      console.log(form.value)
+  }
+  ...
+```
+
+Simdi ise html tarafindan inputlari class tarafina alalim. Bunun icin ilk olarak html *input* tag ini kullanicaz
+
+```html
+  <div class="form-group">
+    <!-- birinci input alani kullanicilar icin acikalma -->
+    <!-- ikinci bu Angular form input unun ismidir. Angular uzerinden object e ulasmak icin kullanilir. En altta oldugu gibi, bu alanin dirty olup olmadigina, validity sine baklmak icin gereklidir. Bu isim sadece html tarafinda kullanilacaktir. Karsisindaki ngModel kismi onemlidir. -->
+    <!-- ucuncu attribute, class daki model object i ile buradaki input u birbirine  esitledik. Two-way binding, banana notation -->
+    <!-- dorduncu attribute da onemli, ngForm object icinde, bu input icin propertyName dir -->
+    <!-- geriye kalanlar html icin onemli olan attribute lardir. -->
+    <input placeholder="Urun Adi" #name="ngModel" [(ngModel)]="model.name" name="htmlName" class="form-control" id="htmlName" required />
+    <div *ngIf="name.invalid&&name.dirty" class="alert alert-danger">
+        Urun ismi gereklidir.
+    </div>
+  </div>
+```
+
+Input Validation inin yapilmasi; sonrasinda ise eger name kismi validation i icin hata olunca basmasi icin bir div
+
+```html
+  <div *ngIf="name.invalid&&name.dirty" class="alert alert-danger">Urun ismi girmek gereklidir.</div>
+```
+
+Buradaki name `ngModel` da kullandigimiz angular form icin kullanilan diesli (#) name. Input state leri de sunlar;
+
+- `name.invalid` demek yani bos  demek.
+- `name.dirty` demek adam name e birseyler yazdi, sonra sildi, kirli kaldi
+- `name.touched` ise adam name input una dokundu, yani fokus ladi sonra focus unu baska yere verdi
+- `name.pristine` ise ilk giriste bos ikenki hali.
+
+Bu durumlara gore validation yapilabilir.
+
+Simdi category ler icin bir **select** olusturalim.
+
+Yine bir div icine html **select** tag i icine de **option** tag i yazalalim. Kategoriler **ngFor** ile cogullanacak cunku kategoriler onlarin icinde olacak:
+
+```html
+  <div>
+      <select #categoryId="ngModel" [(ngModel)]= "model.categoryId" id="htmlCategoryId" name="htmlCategoryName" class="form-control" required>
+          <option *ngFor="let category of categories" [value]="category.id"> {{category.name}} </option>
+      </select>
+      <div *ngIf="categoryId.invalid&&categoryId.touched" class="alert alert-danger">Urun kategory si gereklidir.</div>
+  </div>
+```
+
+Bi de buna bir alert div i ekleyelim. cunku bu field da required. burada angular object inin touched olmasina bakiyoruz
+
+Simdi buton ekleyelim. Bu da html button dan ilerleyerek yapicaz
+
+```html
+  <button type="submit" class="btn butn-primary" [disabled]="productAddForm.invalid">Urun Ekle</button>
+```
+
+Bir urun ekleme butonumuz var. **type** i ise **submit** class ini da bootstrap den aliyoruz. Bi de form valid olmadigi surece tiklanilmaz yapiyoruz. (Sanirim icindeki tum required field larin doldugunda form valid oluyor.)
