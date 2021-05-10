@@ -749,3 +749,40 @@ Burada onemli bir durum var. Biz service den method u cagirdiktan sonra subscrib
 
 - ngOnInit method unun son line ina console.log  ile log bastridik; loading bitti diye, ayni zamanda subscribe method unun icine de log bastirdik, data geldi diye. sonra log lara baktik ki, ngOnInit daha once basilmis.
 
+## HTTP Hatalarinin Ayiklamanmasi
+
+Log lama islemi de, errorAyiklama islemi de httpClient a bagli olarak yapilabilir. Cok guzel bir uygulamasi var. Service method u icinde http get method unu kullandik. Hemen sonuna **pipe** method unu kullanabiliriz. **pipe** method u **iki tane callback method** icine alir, subscribe daki tek callback method uydu. Bunlardan biri **tap**, icincisi ise **catchError** method u dur. tap method u log lama vb. isler icin kullanilirken, catchError error ciktiginda yakalamak icin kullanilir.
+
+Soyle dusunelim, request attik, response bekliyoruz ama reactive sekilde (yani browser thread i block lanmamis)
+
+Method call siralamalari bu sekildedir.
+
+> get -----> tap -----> catchError -----> subscribe
+
+**tap** ve **catchError** method larini kullanabilmek icin aslinda o method lari import etmemiz gerekiyor ve sonra **catchError** da **error** u yakalayip baska bir error da atabiliriz. Bunun icin;
+
+```typescript
+import { Observable, throwError } from 'rxjs'
+import { tap, catchError } from 'rxjs/operators';
+
+...
+
+getProducts(): Observable<Product[]> {
+    return this.httpClient.get<Product[]>(this.path).pipe(
+    tap(),
+    catchError(this.handleError)
+    );
+}
+
+private handleError(handleError: HttpErrorResponse) {
+    let errorMessage = '';
+    if (handleError.error instanceof ErrorEvent) {
+    errorMessage = 'Bir hata olustu: ' + handleError.message;
+    } else {
+    errorMessage = 'Sistemde bir hata olustu'
+    }
+    return throwError(errorMessage);
+}
+
+...
+```
