@@ -1435,3 +1435,50 @@ Simdi ise guard i nasil kullanicagimizi veriyoruz. Bunu yaparken `app-routing.mo
 ```
 
 Yani bir object name ve icine ise bir array seklinde verilecek guard lari sirasyila ekliyoruz. Array cunku bir route a birden fazla guard verilebilir. Buradaki siralama da onemlidir.
+
+## Artik Login Olalim
+
+`login.component.html` deki html input larinin component.ts ile iliskilendirilmesi gerekiyor. Bunu klasik form uygulamasi ile yapabiliriz.
+
+Product daki gibi yap, onu copy paste yapailirsin.
+
+Login form ismi vermen lazim.
+
+Add yerine loginForm verebilirsin.
+
+Kullanici adi olarak degistir email address ini.
+
+Burada bir html tarafindaki form icindeki input field lar icin html name attribute unu vermen gerekiyor. yoksa exception aliyoruz.
+
+```html
+...
+<form class="form-signin" #productAddForm="ngForm" (ngSubmit)="add(productAddForm)">
+    <div class="form-label-group">
+        <input #name="ngModel" [(ngModel)]="model.name" type="text" id="inputUserName" name="inputUserName" class="form-control" placeholder="Kullanici Adi" required autofocus>
+        <label for="inputUserName">Kullanici Adi</label>
+    </div>
+
+    <div class="form-label-group">
+        <input type="password" id="inputPassword" name="inputPassword" class="form-control" placeholder="Sifre" #password="ngModel" [(ngModel)]="model.password" required>
+        <label for="inputPassword">Sifre</label>
+    </div>
+
+    <button class="btn btn-lg btn-primary btn-block" type="submit">Sign in</button>
+    <p class="mt-5 mb-3 text-muted text-center">&copy; 2017-2019</p>
+</form>
+...
+```
+
+Hatirlatma amacli, class ile html arasindaki iliskiyi surada kuruyoruz: `[(ngModel)]="model.name"`
+
+Yani name isminde bir html input olusturuyorsun, onu da component daki model object inin name property sine assign ediyorsun, o kadar.
+
+Submission icin ise bir tane submit butonu koyuyorsun, sonrasinda ise buna basilinca form uzerindeki ngSubmit ile verilen method call ediliyor.
+
+Bunun reactive halini de hazirlayabilirsin.
+
+Simdi component tarafinda login method unu yazalim. 
+
+Login component da ise bizim AccountService inin olmasi gerekiyor, onu provider olmadan inject et, zaten global tanimlamistik. provider a yeniden yazmamamiz lazim.
+
+AccountService uzerinden login method unu call et, ona da this.model i ver, model object i user i barindiriyordu.
