@@ -1380,3 +1380,58 @@ Html formlarini olusturabilmek icin bootstrap den `floating-labels` e git, orada
 Artik ekran ayni sayfayi ekranda gorebilirsin.
 Sonra bazi temizlikleri yap html uzerinde
 Remember me yi kaldir. Simdilik o yetenegimiz yok.
+
+## Linklere Yetkilendirme Yapmak: Guard
+
+Daha once de soyledigimiz gibi, bir islem yapicaz ama login oldun mu demek icin **Guard** lari kullaniyoruz, yani product ekliyecen ama sen login oldun mi hatta, o sayfayi gormek icin bile login olman gerekebilir vb. kurallari eklemek ve uygulamak icin Guard lari kullnicaz.
+
+Ilk olarak **LoginComponent** i icinde **Guard** i yazmamiz gerekiyor. Cunku onun icin **Guard** ekliycez.
+Login component i icerisinde, bir file olusturuyoruz, `login.guard.ts`
+
+Sonra yeni file icine bir class yaziyoruz ismi de `LoginGuard` olsun.
+Bu class `CanActivate` interface ini implement etmeli, `angular/router` dan import edilmelidir. Bunu implementation method u vardir, unu yap. kendisi eklediginde optional olarak cok sey return ediyor, onlari siliyoruz.
+
+Bir de **Guard** lar service gibi calisirlar, o zaman **Injectable decorerator** ini eklememiz gerekiyor. O da `angular/core` dan import ediyoruz. Sonrasinda bu service i `app-module.ts` e eklememiz lazim. providers kismina cunku global ulasilabilen bir service olmasi daha iyi olur.
+
+Simdi unimplemented method kisminina gelelim, method un ismi **canActivate** icine ise **iki tane parametre** aliyor, bir tanesi *(route) ActivatedRouteSnapshot* ki bu next step de active olucak route bilgilerini tutuyor, ikincisi ise **(next) RouterStateSnapshot** o da simdiki route bilgilerini tutuyor, bu method un **boolean** donmesi gerekiyor.
+
+Bu **guard** in user in login olup olmadigini bilmesi icin aslinda **localStorage** dan bilgisine bakabilir veya *AccountService* service uzerinden isLoggedIn method una bakabilir. Service uzerinden islem yapmak daha mantikli cunku localStorage degistirilebilir, login olmasan bile.
+
+Eger login olunmamissa login sayfasina yani component ina route edilmeli. Onun icin bir class a ihtiyacimiz var o da: Router class i. onu da inject ediyoruz. bir service gibi degil tam olarak kendisi global bir object. o da angular/router altinda yer aliyor.
+
+Kodlar;
+
+- `login.guard.ts`:
+
+```typescript
+...
+@Injectable()
+export class LoginGuard implements CanActivate {
+    constructor(private accountService: AccountService, private router: Router) { }
+
+    canActivate(route: ActivatedRouteSnapshot, state: RouterStateSnapshot): boolean {
+        let loggedIn = this.accountService.isLoggedIn()
+        if (loggedIn) {
+            return true; // pass the guard
+        }
+        this.router.navigate(['login']); // login component inin cagirilmasi
+        return false;
+    }
+}
+```
+
+Simdi ise guard i nasil kullanicagimizi veriyoruz. Bunu yaparken `app-routing.module.ts` dosyasinda hangi rooute a guard vermek istiyorsak ona guard i ekliyoruz
+
+```typescript
+    ...
+    { path: 'product-add-1', component: ProductAddClassicFormsComponent },
+    ...
+
+    bunu su sekilde  update ediyoruz mesela;
+
+    ...
+    { path: 'product-add-1', component: ProductAddClassicFormsComponent, canActivate:[LoginGuard]},
+    ...
+```
+
+Yani bir object name ve icine ise bir array seklinde verilecek guard lari sirasyila ekliyoruz. Array cunku bir route a birden fazla guard verilebilir. Buradaki siralama da onemlidir.
