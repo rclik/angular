@@ -702,3 +702,50 @@ Bu yapilan islem:
 
 - HttpClient objesinin *get* method una subscribe olmak. Bu su demek; get method u verilen *url* e *HTTP GET* request i atiyor. **subscribe** method u ise atilan request in sonucunda gelen response un subscribe method u icerisine verilen function araciligiyla islenmesini sagliyor.
 - *get* method unun ekledigimi generic class gelen response un product array tipinde oldugunu belirtmek icindir. Bu sekilde subscribe method u icine gelen response data nin Product array ine cast edilir. *Type safety* islemini saglamis olduk.
+
+## HTTP Islemleri icin Service Olusturmak
+
+Product lari ceken API islerini service inde halledersek daha iyi olacak, moduler bir yapiya sahip olacak project imiz. Hemen bir service olusuralim, services dizini altinda;
+
+> ng g service product
+
+Bu service *ProductComponent* ina ozel olsun, diger component larda gerekli olmadigi icin. Local bir service olusturmak icin **Injectable** declation ini icindeki **providedIn** property sini silelim. Sonrasinda ise ProductComponent icindeki **Component** declaration ina **providers** array property sine service i ekle.
+
+Local service olabilir ama Injectable declaration ini kullanman gereklidir cunku Angular bu declaration ina gore Bu class in bir service oldugunu anlar.
+
+Simdi Http Islemlerini service e alalim. Bunun icin product lari service den alan methodu bu service e almak lazim.**subscribe** isini yine component e birak cunku service in isi data yi getirmek, gelen data nin ne yapilacagi component a ait.
+
+Ayrica *httpClient* i hicbir zaman component da kullanma, data yi getiren tarafda yani service de kullan.
+
+HttpClient i service e tasiyoruz;
+
+- Service i component a inject ediyoruz.
+  - Service de getProducts method u yaziyoruz. Bu method component icin *http* request i yapacak ama subscribe isini yine component yapacak. Bunun boyle olmasinin nedeni ise data yi kullanacak olanin yine component olmasi. hata da olsa onu component halletmelidir.
+  - Simdi, component in subscribe method unu kullanabilmesi icin getProducts method u Observable<Product[]> tipinde return u olmalidir. onu da ekledigimiz de service metod umuz:
+  
+    ```typescript
+        ...
+        getProducts(): Observable<Product[]> {
+            return this.httpClient.get<Product[]>(this.path);
+        }
+        ...
+    ```
+
+  - Sonrasinda bu service i ProductComponent da call ettik ve ngOnInit method unda ise service uzerinden getProducts method unu call ederek products object ini doldurduk.
+  - Service i root yapmadigimiz icin ise `product.component.ts` class inda Component declaration ininda providers olarak service i tanimladik:
+
+    ```typescript
+        ...
+        @Component({
+          selector: 'app-product',
+          templateUrl: './product.component.html',
+          styleUrls: ['./product.component.css'],
+          providers:[ProductService]
+        })
+        ...
+    ```
+
+Burada onemli bir durum var. Biz service den method u cagirdiktan sonra subscribe method unu kullanip gelen data yi isledik. JS bunu yaparken aslinda service method unu call eder etmez, http request in response unu beklemeden bir alt satira geciyor. Buna reaktif programlama denir. Soyle yaptik;
+
+- ngOnInit method unun son line ina console.log  ile log bastridik; loading bitti diye, ayni zamanda subscribe method unun icine de log bastirdik, data geldi diye. sonra log lara baktik ki, ngOnInit daha once basilmis.
+
