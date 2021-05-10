@@ -1499,3 +1499,84 @@ Login butonu `app.component.html` deydi, simdi onu mantiksal olarak eger user gi
         </ng-template>
     </li>
 ```
+
+## Reactive Login Component i Olusturma
+
+Ilk olarak `app/src` nin altina bir tane login folder i yaratiyoruz, klasik login form olacak sekilde bir component olusturalim ve yukarida yazdigimiz component i bunun icine tasiyalim. Hatalari cozerlim. Calistigindan emin olalim.
+
+Sonrasinda ise login folder i altinda reactive login component ini yaratalim.
+
+Simdi ilk olarak bunun route isini halledelim, `app-routing.component.ts` file inda
+ekrani gorduk, sonrasinda bootstrap den bul hallet yeni component in html ini ve css ini
+
+Simdi reactive product eklemeye bakarak login formu olusturalim;
+
+FormBuilder i inject ediyoruz ve FormGroup class property si olusturuyoruz.
+ngOnInit method unda FormBuilder ile FormGroup object ini olusturuyoruz. Olustururken ise alacagimiz input larin isimlerini ve validation larini ekliyoruz.
+
+Kabaca, class kisimi tamamdir, sonrasinda html kismini olusutralim;
+
+```html
+<form [formGroup]="loginForm" class="form-signin" (ngSubmit)="login()">
+    <div class="text-center mb-4">
+        <h1 class="h3 mb-3 font-weight-normal">Login</h1>
+    </div>
+
+    <div class="form-label-group">
+        <input formControlName="userName" type="text" id="idUserNameHtml" name="userNameHtml" class="form-control"
+            placeholder="User Name" required autofocus>
+        <label for="userName">User Name</label>
+    </div>
+
+    <div class="form-label-group">
+        <input formControlName="password" name="userPasswordHtml" type="password" id="inputPassword"
+            class="form-control" placeholder="Password" required>
+        <label for="inputPassword">Password</label>
+    </div>
+
+    <div class="checkbox mb-3">
+    </div>
+    <button class="btn btn-lg btn-primary btn-block" type="submit">Sign in</button>
+    <p class="mt-5 mb-3 text-muted text-center">&copy; 2021-2022</p>
+</form>
+```
+
+Sonrasinda ise class tarafinda submit isleminin yapilmasidir.
+
+## Bir Prodcut u Sayfada Gostermek
+
+Ilk olarak bir tane product i view etmek icin bir html ve component yazmamiz lazim. Yeni bir tane yaratiyoruz. O da product folder i icinde olsuin
+
+> ng g component prodcut-details
+
+Buna bir tane route verelim. O da produts dan sonra bir produc id si ile olsun.
+
+```typescript
+...
+{ path: 'products/:productId', component: ProductDetailsComponent },
+...
+```
+
+Sanirim bu isimizi gorur sonrasinda ise gelen id yi yakalamak icin ActivatedRoute u kullanmamiz lazim.
+
+Yukarda da soyledigimiz gibi url deki parametereleri alabilmek icin ActivatedRoute u kullanicagiz, bunun kullanimi da oldukca basit, normal bir service kullanir gibi bir object i component a inject edicegiz, sonrasinda ActivatedRoute object inin params property sine subscribe olacagiz, degisikliklerden haberdar olmak icin. (Observable mimarisi). Bu islemi ise ngOnInit method unda yapicaz:
+
+Simdi ise details deki urunu bir cart a eklememiz lazim. Onu icin oncelikle bir tane cart service i yazalim. cart islerini icinde tutabiliriz.
+Daha onceside ise bir tane cart component i yazalim, o da cart islerini gorecek.
+Bu component icine cartItem adinda bir class yazalim, bizim cart elamlarini ve quantity lerini tutacak.
+Simdi ise bir tane cart item listesi create edip hard coded sekilde onu load edelim cart component inda. sonrasinda cart component icin de bir gorsellik ayarlayalim bootstrap den.
+
+## Product a Tiklayarak Product Details Goruntulenmesi
+
+Bunu yapabilmek icin sadece product component sayfasindaki img element ine routerLink attribute unun eklenmesi lazim. `<img ... routerLink="/products/{{product.id}}">`
+
+Ayrinti bir nokta, **routerLink** `/` ile baslamalidir, onu eklemezsek, icinde bulundugu context uzerine ekleme yapiyor. Ornegin, bu durumda `/` i kaldirirsak, `<img ... routerLink="products/{{product.id}}">`. Bir image a tiklarsak, aranacak url su olacak; /products/prodocts/12
+
+## Sepet Gelistirmesi
+
+Ilk olarak, product larin altindaki sepete ekle butonuna tiklayinca, bunlarin genel bir object e eklenmesini saglamaliyiz.
+Bunun icin ilk olarak cart icindeki bir element i temsil edecek bir cart class i. Sonra da cart icindeki itemlari tutacak bir liste tanimlalamiz lazim.
+
+Bir tane cart folder i oluturuyoruz. Cunku bu iki class o folder icinde olmali, ayrica bu folder da cart component i de tanimlayacagiz.
+
+Bir de cart islemlerini yonetebilecegin bir service yazalim, bu sekilde cartItems a sadece bu service uzerinden degisiklik yapicagiz. Daha moduler bir code olacak.
