@@ -970,3 +970,64 @@ Bazen categoryId bos olarak gelebilir ki bu normak, direk olarak products url in
     }
     ...
 ```
+
+## Gorsel Tasarimin Iyilestirilmesi
+
+Simdi ise tasarimin iyilestirilmesi uzerine ugrasacagiz,
+
+Bootstrap den bir dashboard ornegi aliyoruz. bootstrap -> examples -> dashboard kismina gidiyoruz.
+Oradaki ornegin source code undan body kismini kopyaliyoruz. bunu da app.component.html e ekliyoruz. script kisimlarini da cikardik.
+
+Tam olarak istedigimiz bir goruntu elde edemedik cunku bu html de baska css dosyalari da mevcut. onlari da source code dan aliyoruz.
+Sonra o css i de component in css dosyasina ekliyoruz. tabii o da app.component.css dosyasi olacak.
+
+simdi ise aynisi goruntuyu elde etmis olduk.
+dashboard gelmedi cunku orasi script araciligiyla populate ediliyordu. orasini sildik.
+
+sonra menu icin baska bir bootstrap ornegine gidiyoruz. ayni yerden blog a giriyoruz, oranin menu kismini yine ayni sekilde view source a basarak aliyoruz.
+onu da gittik yine app.component.html de html main tag inin icine koyduk. onun icin muhtelif bir css dosyasina ihtiyac yok.
+sonra dashboard ve section kismindan kurtulalim 
+en son search i de sildik cunku bizim search umuz var.
+
+son olarak bizim category ve nav component ini de kaldiriyoruz. sadece product component ini gosterecegiz. o da main in icinde olmali.
+
+urun listesi yazdigimiz header kismini da product component dan kaldiralim. 
+
+simdi ise product listesini gosterdigmiz yerde biraz yukari ile hizalama sorunu var gibi goruluyor. onun icin card element ina bir css class i yazalim onu da element e vereli:
+
+product.component.css file ina:
+.productBox{
+    padding : 15px;
+}
+
+bunu da product.component.html de class olarak ver.
+
+bootstrap 4.2 ile calisiyoruz, onun example larina bakabilirsin.
+
+### Kategori Component inin Adam Edilmesi
+
+Bunu yaparken de eskisi gibi category componet i cagiracagiz. Cagirmadan once ise, html de menu icin kullandigimiz  tag lari `app.component.html` den kesip aliyoruz ve onu `category.component.html` e yapistriyoruz:
+
+Simdi category.component.html de cogullayacagimiz sey ise a tag i. Ona gore ngFor ona ekliyoruz, ayrica routerLink i de ona ekliyoruz.
+
+Diger eskiden kalan kisimlari da siliyoruz.
+
+O islemleri yaptiktan sonra category component ini product component indan call etmemiz gerekiyor.
+Bunun icin ise product.component.html icine category component inin selector name i ile bir selector create ediyoruz.
+
+### Sol Tarafin Adam Edilmesi
+
+Company Name yerine E-Ticaret App yaziyoruz.
+`dashboard` yerine ise tum urunleri gostermek icin routerLink veriyoruz. ismine de magaza de.
+sonra ise product ekleme icin bir menu elemani ekle. ilki klasik yontemle olsun ikincisi reaktive yontemle olsun. Iki ayri yotem var angular da.
+
+burasi ise app.component.html de bulunuyor. orayi edit liyoruz.
+yeni router link ler ekledikten sonra onlarin da routing ini yapmamiz lazim. onu da app.routing-module.ts de eklemeyi unutmayalim:
+
+```typescript
+... 
+
+{ path: 'product-add-1', component: ProductComponent },
+{ path: 'product-add-2', component: ProductComponent },
+...
+```
